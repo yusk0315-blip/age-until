@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>今の生活水準、何歳まで維持できる？</title>
+  <meta name="description" content="貯金と生活費（＋任意の収入）から『あと何年・何歳まで』を即計算。派生シナリオをワンタップ比較＆ランキング。" />
+  <style>
+    :root{
+      --bg:#f3f5f9;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --shadow: 0 8px 24px rgba(15, 23, 42, .08);
+      --radius: 18px;
+
+      --good:#16a34a;
+      --ok:#0ea5e9;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 14px 12px 90px;
+    }
+    .wrap{max-width:900px;margin:0 auto}
+    .hero{
+      background: linear-gradient(135deg, rgba(14,165,233,.12), rgba(245,158,11,.10), rgba(239,68,68,.10));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 16px 14px;
+      box-shadow: var(--shadow);
+    }
+    .title{font-size:20px;font-weight:950;margin:0 0 6px}
+    .subtitle{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+    .grid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 900px){
+      body{padding: 18px 14px 90px;}
+      .grid{grid-template-columns: 1.05fr .95fr;}
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    h2{margin:0 0 10px;font-size:15px;letter-spacing:.02em}
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 190px;
+      gap: 10px;
+      align-items:center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #eef2f7;
+    }
+    .row:last-child{border-bottom:0}
+    label{font-size:13px;font-weight:800}
+    .hint{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px;line-height:1.35}
+    input{
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font-size: 14px;
+      outline: none;
+      background: #fbfdff;
+    }
+    input:focus{border-color:#93c5fd; box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    button{
+      appearance:none;
+      border: 1px solid var(--line);
+      background: #0f172a;
+      color: #fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    button.secondary{background:#fff;color:#0f172a}
+    button.ghost{background:transparent;color:#0f172a}
+    .small{font-size:12px;color:var(--muted);line-height:1.55;margin:10px 0 0}
+
+    /* ==== result area ==== */
+    .score{display:flex;align-items:center;gap:14px}
+    .donut{
+      width:92px;height:92px;border-radius:999px;
+      background: conic-gradient(var(--ok) 0deg, var(--ok) 0deg, #e5e7eb 0deg);
+      position:relative;flex:0 0 auto;
+    }
+    .donut::after{
+      content:""; position:absolute; inset:12px; background:#fff; border-radius:999px; border:1px solid var(--line);
+    }
+    .donut span{
+      position:absolute;inset:0;display:grid;place-items:center;z-index:2;
+      font-weight:950;font-size:16px; letter-spacing:.02em;
+    }
+    .kpi{display:grid;gap:6px}
+    .kpi .big{font-size:22px;font-weight:950;line-height:1.1}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 10px;border-radius:999px;border:1px solid var(--line);
+      font-size:12px;font-weight:950;width:fit-content;background:#fff;
+    }
+    .dot{width:10px;height:10px;border-radius:50%}
+    .advice{
+      margin-top:10px;border-radius:16px;border:1px solid var(--line);
+      background:#fbfdff;padding:12px;line-height:1.65;font-size:13px;
+    }
+
+    /* ==== scenario ranking ==== */
+    .table{margin-top:10px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+    .trow{
+      display:grid;grid-template-columns: 1fr 150px;gap:10px;
+      padding:10px 12px;border-bottom:1px solid #f1f5f9;font-size:13px;align-items:center;
+    }
+    .trow:last-child{border-bottom:0}
+    .right{text-align:right;font-variant-numeric: tabular-nums;}
+    .muted{color:var(--muted)}
+
+    .pillRow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .pill{
+      font-size:12px;font-weight:900;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;color:#0f172a;cursor:pointer;
+    }
+    .pill.primary{background:#0f172a;color:#fff;border-color:#0f172a}
+    .pill:active{transform: translateY(1px)}
+    .divider{height:1px;background:#eef2f7;margin:12px 0}
+
+    .tag{
+      font-size:11px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);
+      color:#0f172a;background:#fff;font-weight:900; white-space:nowrap;
+    }
+    .tag.good{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.08)}
+    .tag.ok{border-color:rgba(14,165,233,.35);background:rgba(14,165,233,.08)}
+    .tag.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.10)}
+    .tag.bad{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.10)}
+
+    .shareBox{
+      margin-top:12px;
+      border:1px dashed #cbd5e1;border-radius:16px;padding:12px;background:#f8fafc;
+      font-size:12px;color:var(--muted);line-height:1.6;
+    }
+
+    @media (max-width: 420px){
+      .row{grid-template-columns:1fr 150px;}
+      .trow{grid-template-columns:1fr 120px;}
+    }
+  </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="何歳まで？">
+<link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <p class="title">今の生活水準、何歳まで維持できる？</p>
+      <p class="subtitle">
+        貯金と生活費（＋任意の収入）から「あと何年・何歳まで」を即計算。<b>派生をワンタップ比較して、ランキングで“詰み”が見える。</b><br>
+        ※金額はすべて <b>月額</b>。投資利回り・インフレ・臨時支出などは未考慮の概算です。
+      </p>
+    </div>
+
+    <div class="grid">
+      <!-- INPUT -->
+      <section class="card">
+        <h2>入力</h2>
+
+        <div class="row">
+          <div>
+            <label for="ageNow">現在の年齢（歳）</label>
+            <span class="hint">例：32</span>
+          </div>
+          <input id="ageNow" type="number" inputmode="numeric" min="0" placeholder="32">
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="savings">貯金額（円）</label>
+            <span class="hint">例：2,000,000</span>
+          </div>
+          <input id="savings" type="number" inputmode="numeric" min="0" placeholder="2000000">
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="monthlyCost">月生活費（円）</label>
+            <span class="hint">例：250,000</span>
+          </div>
+          <input id="monthlyCost" type="number" inputmode="numeric" min="0" placeholder="250000">
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="monthlyIncome">月収入（任意）</label>
+            <span class="hint">入れると「生活費−収入＝取り崩し」で計算</span>
+          </div>
+          <input id="monthlyIncome" type="number" inputmode="numeric" min="0" placeholder="0">
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <h2 style="margin:0">ワンタップ・プリセット</h2>
+            <span class="tag ok">SNS向け</span>
+          </div>
+          <div class="pillRow" id="presetRow">
+            <button class="pill primary" data-preset="calc">計算</button>
+            <button class="pill" data-preset="quit_income0">仕事辞めたら（収入0）</button>
+            <button class="pill" data-preset="quit_costminus10k">辞めたら（生活費-1万）</button>
+            <button class="pill" data-preset="family_plus50k">家族+1人（+5万）</button>
+            <button class="pill" data-preset="rent_plus20k">家賃+2万</button>
+            <button class="pill" data-preset="save_half">貯金が半分</button>
+            <button class="pill" data-preset="reset_deltas">派生を解除</button>
+          </div>
+          <p class="small">※プリセットは「入力値」自体は壊さず、<b>派生（差分）</b>として反映します。</p>
+        </div>
+
+        <div class="actions">
+          <button id="calcBtn">診断する（ランキング更新）</button>
+          <button class="secondary" id="saveBtn">保存</button>
+          <button class="secondary" id="loadBtn">読み込み</button>
+          <button class="ghost" id="resetBtn">リセット</button>
+        </div>
+
+        <div class="shareBox">
+          <b>スクショ映えのコツ：</b>右側の「結果」→「ランキング」まで入るように撮ると拡散されやすい。<br>
+          “最悪ケース”が一番上に来るので、ストーリーが出ます。
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section class="card">
+        <h2>結果（スクショ映え）</h2>
+
+        <div class="score">
+          <div class="donut" id="donut"><span id="scoreLabel">--</span></div>
+          <div class="kpi">
+            <div class="badge">
+              <span class="dot" id="dot" style="background: var(--ok)"></span>
+              <span id="level">未診断</span>
+            </div>
+            <div class="big" id="mainLine">あと -- 年 -- ヶ月</div>
+            <div class="muted" id="subLine">到達：-- 歳 / 毎月取り崩し：-- 円</div>
+          </div>
+        </div>
+
+        <div class="advice" id="advice">
+          左で入力して「診断する」を押してね。<br>
+          収入を入れると“耐えられる年数”が伸びる／辞めたら短くなる、が一発で見える。
+        </div>
+
+        <div class="actions" style="margin-top:12px">
+          <button class="secondary" id="shareBtn">結果をコピー（X用）</button>
+        </div>
+
+        <div class="table" id="rankTable" style="margin-top:12px">
+          <div class="trow">
+            <div class="muted">シナリオ（ワースト→ベスト）</div>
+            <div class="muted right">あと何年</div>
+          </div>
+          <!-- rows injected -->
+        </div>
+
+        <p class="small">
+          ※ランキングは「貯金が尽きるまでの期間」が短い順（ワースト順）。<br>
+          収支が黒字（取り崩し≤0）の場合は「∞（貯金が減らない）」扱い。
+        </p>
+      </section>
+    </div>
+  </div>
+
+<script>
+  const el = (id) => document.getElementById(id);
+  const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
+  const yen = (n) => `${Math.round(Number(n||0)).toLocaleString("ja-JP")}円`;
+  const fmt = (n) => `${Math.round(Number(n||0)).toLocaleString("ja-JP")}`;
+
+  // 入力
+  const inputs = ["ageNow","savings","monthlyCost","monthlyIncome"].map(el);
+
+  function getBase(){
+    const v = {};
+    for (const i of inputs) v[i.id] = Math.max(0, Number(i.value || 0));
+    return v;
+  }
+
+  // 派生差分（プリセットで変更される）
+  const DELTA_KEY = "age_until_deltas_v1";
+  function getDeltas(){
+    const raw = localStorage.getItem(DELTA_KEY);
+    if (!raw) return { addCost:0, addIncome:0, mulSavings:1 };
+    try{
+      const d = JSON.parse(raw);
+      return {
+        addCost: Number(d.addCost||0),
+        addIncome: Number(d.addIncome||0),
+        mulSavings: Number(d.mulSavings||1),
+      };
+    }catch(e){
+      return { addCost:0, addIncome:0, mulSavings:1 };
+    }
+  }
+  function setDeltas(d){
+    localStorage.setItem(DELTA_KEY, JSON.stringify(d));
+  }
+  function resetDeltas(){
+    setDeltas({ addCost:0, addIncome:0, mulSavings:1 });
+  }
+
+  // months -> years/months
+  function ym(totalMonths){
+    const m = Math.max(0, Math.floor(totalMonths));
+    return { y: Math.floor(m/12), m: m%12, total:m };
+  }
+
+  function calc({ageNow, savings, monthlyCost, monthlyIncome}){
+    // 毎月の取り崩し（+なら減る）
+    const deficit = (monthlyCost - monthlyIncome);
+    if (!isFinite(deficit) || !isFinite(savings) || !isFinite(monthlyCost) || !isFinite(monthlyIncome)) {
+      return { ok:false, msg:"入力が不足しています" };
+    }
+    if (deficit <= 0){
+      return { ok:true, infinite:true, deficit, months: Infinity, untilAge: Infinity };
+    }
+    const months = Math.floor(savings / deficit);
+    const untilAge = isFinite(ageNow) ? (ageNow + months/12) : NaN;
+    return { ok:true, infinite:false, deficit, months, untilAge };
+  }
+
+  function scoreFromMonths(months){
+    // 0〜50年（600ヶ月）を0〜100に圧縮（∞は100）
+    if (!isFinite(months)) return 100;
+    return clamp(Math.round((months / 600) * 100), 0, 100);
+  }
+
+  function judge(score){
+    // score: 0〜100（高いほど余裕）
+    if (!isFinite(score)) return {level:"未診断", color:"--ok", tag:"ok"};
+    if (score >= 80) return {level:"余裕（強）", color:"--good", tag:"good"};
+    if (score >= 55) return {level:"注意（まあOK）", color:"--ok", tag:"ok"};
+    if (score >= 30) return {level:"危険（要テコ入れ）", color:"--warn", tag:"warn"};
+    return {level:"ヤバい（最優先）", color:"--bad", tag:"bad"};
+  }
+
+  function setDonut(percent, colorVar){
+    const p = clamp(percent, 0, 100);
+    const deg = Math.round(p * 3.6);
+    const donut = el("donut");
+    const c = getComputedStyle(document.documentElement).getPropertyValue(colorVar);
+    donut.style.background = `conic-gradient(${c} 0deg, ${c} ${deg}deg, #e5e7eb ${deg}deg)`;
+  }
+
+  function scenarioList(base, deltas){
+    const b = {
+      ageNow: base.ageNow,
+      savings: base.savings * deltas.mulSavings,
+      monthlyCost: base.monthlyCost + deltas.addCost,
+      monthlyIncome: base.monthlyIncome + deltas.addIncome,
+    };
+
+    // ① + 派生(A〜E) + 「プリセット差分反映後」の合計
+    // ここでは「入力＋差分」をベースとして、その上にA〜Eを作る
+    const baseScenario = { key:"base", name:"① 今の生活水準（差分反映）", data: {...b} };
+    const A = { key:"A", name:"①-A 仕事辞めたら（収入0）", data: {...b, monthlyIncome: 0 } };
+    const B = { key:"B", name:"①-B 家族+1人（+5万）", data: {...b, monthlyCost: b.monthlyCost + 50000 } };
+    const C = { key:"C", name:"①-C 家賃+2万", data: {...b, monthlyCost: b.monthlyCost + 20000 } };
+    const D = { key:"D", name:"①-D 貯金が半分", data: {...b, savings: b.savings * 0.5 } };
+    const E = { key:"E", name:"①-E 老後だけ（65歳/収入0）", data: {...b, ageNow: 65, monthlyIncome: 0 } };
+
+    return [baseScenario, A, B, C, D, E].map(s=>{
+      const r = calc(s.data);
+      return {...s, r};
+    });
+  }
+
+  function render(){
+    const base = getBase();
+
+    // 未入力時はガード
+    if (!(base.savings > 0) || !(base.monthlyCost >= 0) || !(base.ageNow >= 0)){
+      el("level").textContent = "未診断";
+      el("mainLine").textContent = "あと -- 年 -- ヶ月";
+      el("subLine").textContent = "到達：-- 歳 / 毎月取り崩し：-- 円";
+      el("advice").innerHTML = "左で入力して「診断する」を押してね。";
+      el("scoreLabel").textContent = "--";
+      setDonut(0, "--ok");
+      el("dot").style.background = "var(--ok)";
+      renderRank([]);
+      return;
+    }
+
+    const deltas = getDeltas();
+    const list = scenarioList(base, deltas);
+
+    // “いま見せる”のは base（差分反映）を表示
+    const main = list.find(x=>x.key==="base");
+    const r = main.r;
+
+    if (!r.ok){
+      el("advice").textContent = r.msg;
+      return;
+    }
+
+    const sc = scoreFromMonths(r.months);
+    const j = judge(sc);
+
+    el("level").textContent = j.level;
+    el("dot").style.background = `var(${j.color})`;
+    setDonut(sc, j.color);
+    el("scoreLabel").textContent = `${sc}`;
+
+    if (r.infinite){
+      el("mainLine").textContent = "貯金は減らない（∞）";
+      el("subLine").textContent = `毎月の収支：+${yen(Math.abs(r.deficit))} / 到達：∞`;
+      el("advice").innerHTML =
+        `この条件だと貯金は減りません。<br>
+         ただし「収入が下がる」「固定費が増える」と一気に短くなるので、派生(A〜E)でワーストを見ておくのが強い。`;
+    }else{
+      const d = ym(r.months);
+      const untilY = Math.floor(r.untilAge);
+      const untilM = Math.round((r.untilAge - untilY) * 12);
+      const untilLabel = isFinite(r.untilAge) ? `${untilY}歳${clamp(untilM,0,11)}ヶ月` : "--";
+      el("mainLine").textContent = `あと ${d.y}年${d.m}ヶ月`;
+      el("subLine").textContent = `到達：${untilLabel} / 毎月取り崩し：${yen(r.deficit)}`;
+      el("advice").innerHTML =
+        `ワーストケースが短いほど危険。<br>
+         <b>ランキング上位（短い）を潰す＝“詰まない”</b> です。`;
+    }
+
+    // ランキング（短い順＝ワースト→ベスト）
+    renderRank(list);
+  }
+
+  function rankLabelTag(r){
+    if (!r.ok) return {cls:"tag warn", txt:"エラー"};
+    if (r.infinite) return {cls:"tag good", txt:"∞"};
+    const s = scoreFromMonths(r.months);
+    const j = judge(s);
+    return {
+      cls: `tag ${j.tag}`,
+      txt: j.level
+    };
+  }
+
+  function yearsText(r){
+    if (!r.ok) return "--";
+    if (r.infinite) return "∞";
+    const d = ym(r.months);
+    return `${d.y}年${d.m}ヶ月`;
+  }
+
+  function renderRank(list){
+    const table = el("rankTable");
+    // 先頭2行残して作り直し
+    table.querySelectorAll(".trow.data").forEach(n=>n.remove());
+
+    if (!list || list.length===0){
+      const row = document.createElement("div");
+      row.className = "trow data";
+      row.innerHTML = `<div class="muted">入力して診断すると、ここにランキングが出ます</div><div class="right muted">--</div>`;
+      table.appendChild(row);
+      return;
+    }
+
+    const sorted = [...list].sort((a,b)=>{
+      const am = a.r.infinite ? Infinity : a.r.months;
+      const bm = b.r.infinite ? Infinity : b.r.months;
+      return am - bm;
+    });
+
+    sorted.forEach((s, idx)=>{
+      const tag = rankLabelTag(s.r);
+      const row = document.createElement("div");
+      row.className = "trow data";
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <b>${idx+1}.</b> ${s.name}
+          <span class="${tag.cls}">${tag.txt}</span>
+        </div>
+        <div class="right"><b>${yearsText(s.r)}</b></div>
+      `;
+      table.appendChild(row);
+    });
+  }
+
+  // ===== presets =====
+  function applyPreset(type){
+    const d = getDeltas();
+
+    switch(type){
+      case "quit_income0":
+        // 差分として「収入を0に寄せたい」ので、addIncome を「-現在収入」にする
+        // ただし入力が未設定だと0扱い
+        const inc = Number(el("monthlyIncome").value || 0);
+        d.addIncome = -inc;
+        break;
+
+      case "quit_costminus10k":
+        d.addCost = (d.addCost || 0) - 10000;
+        break;
+
+      case "family_plus50k":
+        d.addCost = (d.addCost || 0) + 50000;
+        break;
+
+      case "rent_plus20k":
+        d.addCost = (d.addCost || 0) + 20000;
+        break;
+
+      case "save_half":
+        d.mulSavings = (d.mulSavings || 1) * 0.5;
+        break;
+
+      case "reset_deltas":
+        resetDeltas();
+        render();
+        return;
+
+      case "calc":
+      default:
+        // nothing
+        break;
+    }
+
+    // ガード（極端になりすぎるのを防ぐ）
+    d.addCost = clamp(d.addCost, -200000, 400000);
+    d.addIncome = clamp(d.addIncome, -1000000, 1000000);
+    d.mulSavings = clamp(d.mulSavings, 0.05, 5);
+
+    setDeltas(d);
+    render();
+  }
+
+  // ===== save/load/reset =====
+  const DATA_KEY = "age_until_app_data_v1";
+
+  function save(){
+    const v = getBase();
+    localStorage.setItem(DATA_KEY, JSON.stringify(v));
+    alert("保存しました");
+  }
+
+  function load(){
+    const raw = localStorage.getItem(DATA_KEY);
+    if (!raw){ alert("保存データがありません"); return; }
+    const v = JSON.parse(raw);
+    for (const i of inputs) i.value = v[i.id] ?? "";
+    render();
+    alert("読み込みました");
+  }
+
+  function resetAll(){
+    for (const i of inputs) i.value = "";
+    localStorage.removeItem(DATA_KEY);
+    resetDeltas();
+    render();
+  }
+
+  async function shareCopy(){
+    const base = getBase();
+    const d = getDeltas();
+    const list = scenarioList(base, d);
+    const main = list.find(x=>x.key==="base");
+    const r = main.r;
+
+    let headline = "未診断";
+    let detail = "";
+    if (r.ok && r.infinite){
+      headline = "貯金は減らない（∞）";
+      detail = `毎月の収支：+${fmt(Math.abs(r.deficit))}円`;
+    }else if (r.ok){
+      const dd = ym(r.months);
+      headline = `あと${dd.y}年${dd.m}ヶ月`;
+      detail = `毎月取り崩し：${fmt(r.deficit)}円`;
+    }
+
+    // ランキング上位3つ（ワースト）を抜粋
+    const sorted = [...list].sort((a,b)=>{
+      const am = a.r.infinite ? Infinity : a.r.months;
+      const bm = b.r.infinite ? Infinity : b.r.months;
+      return am - bm;
+    }).slice(0,3);
+
+    const top3 = sorted.map((s,i)=>`${i+1}) ${s.name}：${yearsText(s.r)}`).join("\n");
+
+    const deltaText = `差分：生活費${d.addCost>=0?"+":""}${fmt(d.addCost)}円 / 収入${d.addIncome>=0?"+":""}${fmt(d.addIncome)}円 / 貯金×${d.mulSavings}`;
+
+    const text =
+`【今の生活水準、何歳まで？】
+結果：${headline}
+${detail}
+${deltaText}
+
+ワーストTOP3（短い順）：
+${top3}`;
+
+    try{
+      await navigator.clipboard.writeText(text);
+      alert("コピーしました（Xに貼れます）");
+    }catch(e){
+      prompt("手動コピーしてね", text);
+    }
+  }
+
+  // wiring
+  el("calcBtn").addEventListener("click", render);
+  el("saveBtn").addEventListener("click", save);
+  el("loadBtn").addEventListener("click", load);
+  el("resetBtn").addEventListener("click", resetAll);
+  el("shareBtn").addEventListener("click", shareCopy);
+
+  // presets buttons
+  el("presetRow").querySelectorAll("button[data-preset]").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      applyPreset(btn.getAttribute("data-preset"));
+    });
+  });
+
+  // 入力したら軽く自動更新（手取りアプリと同じ挙動寄せ）
+  for (const i of inputs){
+    i.addEventListener("input", ()=>{
+      const s = Number(el("savings").value || 0);
+      const c = Number(el("monthlyCost").value || 0);
+      if (s > 0 && c >= 0) render();
+    });
+  }
+
+  (function init(){
+    // 初期表示：ランキング枠だけ作る
+    renderRank([]);
+    render();
+  })();
+</script>
+<script>
+  // PWA: register Service Worker
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
